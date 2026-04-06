@@ -152,11 +152,17 @@ export class GameScene extends Phaser.Scene {
           }
         } else if (!this._rope?.active) {
           if (Phaser.Input.Keyboard.JustDown(this.spaceKey)) {
-            this._rope = new NinjaRope(
+            if (this._rope) { this._rope.destroy(); this._rope = null; }
+            const rope = new NinjaRope(
               this, this.terrain, worm,
               () => { /* rope release doesn't end turn */ }
             );
-            this._rope.fire(worm.getAimVector());
+            rope.fire(worm.getAimVector());
+            if (rope.active) {
+              this._rope = rope;
+            } else {
+              rope.destroy();
+            }
           }
         }
       }

@@ -44,7 +44,7 @@ export class NinjaRope {
 
     const dx = ox - this.anchorX;
     const dy = oy - this.anchorY;
-    this.angle = Math.atan2(dx, -dy);
+    this.angle = Math.atan2(dx, dy);
     this.angularVel = 0;
     this.active = true;
 
@@ -70,7 +70,7 @@ export class NinjaRope {
     if (scene.cursors?.right.isDown) this.angularVel += swingSpeed * dt;
 
     this.worm.x = this.anchorX + Math.sin(this.angle) * this.ropeLength;
-    this.worm.y = this.anchorY - Math.cos(this.angle) * this.ropeLength;
+    this.worm.y = this.anchorY + Math.cos(this.angle) * this.ropeLength;
 
     this.graphics.clear();
     this.graphics.lineStyle(2, 0xdddddd, 1);
@@ -86,7 +86,7 @@ export class NinjaRope {
   release() {
     if (!this.active) return;
     this.active = false;
-    this.graphics.clear();
+    this.graphics.destroy();
 
     const tangentX = Math.cos(this.angle);
     const tangentY = Math.sin(this.angle);
