@@ -7,6 +7,7 @@ import { TurnManager } from '../managers/TurnManager.js';
 import { Bazooka } from '../entities/weapons/Bazooka.js';
 import { Grenade } from '../entities/weapons/Grenade.js';
 import { Shotgun } from '../entities/weapons/Shotgun.js';
+import { NinjaRope } from '../entities/weapons/NinjaRope.js';
 
 const WEAPONS = ['Bazooka', 'Grenade', 'Shotgun', 'Ninja Rope'];
 
@@ -35,6 +36,7 @@ export class GameScene extends Phaser.Scene {
     this.powerCharge = 0;
     this.isCharging = false;
     this._currentWeapon = null;
+    this._rope = null;
   }
 
   _ammoKey() {
@@ -47,6 +49,7 @@ export class GameScene extends Phaser.Scene {
     this._currentWeapon = null;
     this.isCharging = false;
     this.powerCharge = 0;
+    if (this._rope) { this._rope.destroy(); this._rope = null; }
   }
 
   update(time, delta) {
@@ -66,11 +69,13 @@ export class GameScene extends Phaser.Scene {
         this.weaponIndex = (this.weaponIndex + WEAPONS.length - 1) % WEAPONS.length;
         this.isCharging = false;
         this.powerCharge = 0;
+        if (this._rope) { this._rope.destroy(); this._rope = null; }
       }
       if (Phaser.Input.Keyboard.JustDown(this.keyE)) {
         this.weaponIndex = (this.weaponIndex + 1) % WEAPONS.length;
         this.isCharging = false;
         this.powerCharge = 0;
+        if (this._rope) { this._rope.destroy(); this._rope = null; }
       }
 
       // Fire bazooka (weapon index 0)
@@ -136,10 +141,30 @@ export class GameScene extends Phaser.Scene {
           this._currentWeapon.fire(worm.x, worm.y, worm.getAimVector());
         }
       }
+
+      // Ninja Rope (weapon index 3)
+      if (this.weaponIndex === 3) {
+        if (this._rope && this._rope.active) {
+          this._rope.update(delta);
+          if (Phaser.Input.Keyboard.JustDown(this.spaceKey)) {
+            this._rope.release();
+            this._rope = null;
+          }
+        } else if (!this._rope?.active) {
+          if (Phaser.Input.Keyboard.JustDown(this.spaceKey)) {
+            this._rope = new NinjaRope(
+              this, this.terrain, worm,
+              () => { /* rope release doesn't end turn */ }
+            );
+            this._rope.fire(worm.getAimVector());
+          }
+        }
+      }
     }
 
-    // Update all worms
+    // Update all worms (skip active worm while on rope)
     for (const w of this.teamManager.allWorms) {
+      if (w === worm && this._rope?.active) continue;
       w.update(this.terrain, delta);
     }
 
