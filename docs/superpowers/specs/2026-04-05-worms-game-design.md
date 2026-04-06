@@ -1,4 +1,4 @@
-# Worms-Like Game — Design Spec
+# Hartworms — Design Spec
 
 **Date:** 2026-04-05
 **Project:** Father-son game project (Alek + Cole, age 10)
@@ -30,6 +30,7 @@ The project is explicitly a learning and bonding exercise. Cole contributes code
 worms-game/
   index.html
   src/
+    config.js                 ← ALL tunable game constants (see Config section)
     main.js                   ← Phaser game config, scene registry
     scenes/
       MenuScene.js            ← title screen, team count/name config (2–4 teams)
@@ -52,11 +53,68 @@ worms-game/
 
 ---
 
+## Config System
+
+All tunable game constants live in a single `src/config.js` file. Nothing is hardcoded elsewhere — entities and managers import from config. This means Cole can change any number in one place and immediately see the effect.
+
+```js
+// src/config.js
+export const CONFIG = {
+  // Teams & worms
+  maxTeams: 4,
+  wormsPerTeam: 2,          // Cole's tuning zone
+  wormHP: 100,              // Cole's tuning zone
+
+  // Turn rules
+  turnDuration: 30,         // seconds
+  windMin: -5,
+  windMax: 5,
+
+  // Weapons — ammo
+  ammo: {
+    bazooka: 3,             // Cole's tuning zone
+    grenade: 3,             // Cole's tuning zone
+    shotgun: 2,             // Cole's tuning zone
+    ninjaRope: Infinity,
+  },
+
+  // Weapons — damage & physics
+  bazooka: {
+    damage: 50,             // Cole's tuning zone
+    blastRadius: 60,        // Cole's tuning zone
+    speed: 600,
+  },
+  grenade: {
+    damage: 50,             // Cole's tuning zone
+    blastRadius: 60,        // Cole's tuning zone
+    fuseTime: 3000,         // ms — Cole's tuning zone
+    bounce: 0.5,            // elasticity — Cole's tuning zone
+  },
+  shotgun: {
+    damage: 15,             // per pellet — Cole's tuning zone
+    pellets: 3,             // Cole's tuning zone
+    spread: 12,             // degrees — Cole's tuning zone
+    knockback: 200,         // Cole's tuning zone
+  },
+  ninjaRope: {
+    maxLength: 300,         // pixels — Cole's tuning zone
+    swingSpeed: 3,          // Cole's tuning zone
+  },
+
+  // Terrain
+  terrainSeed: null,        // null = random each match; set a number to replay a map
+};
+```
+
+The `terrainSeed` field is a bonus: set it to any number to replay an exact map layout — useful for testing, or for a rematch on the same terrain.
+
+---
+
 ## Teams & Turn Structure
 
 - **Teams:** 2–4, configured on the menu screen before match starts
 - **Colors:** Red, Blue, Green, Yellow (classic Worms palette)
-- **Worms per team:** 2 (fixed for MVP)
+- **Worms per team:** `CONFIG.wormsPerTeam` (default 2)
 - **Turn order:** Sequential — Team 1 → Team 2 → Team 3 → Team 4 → repeat
 - **Turn timer:** 30 seconds. When it expires, the turn ends immediately.
 - **Elimination:** A team is eliminated when all its worms reach 0 HP
@@ -88,7 +146,7 @@ worms-game/
 
 ## Weapons
 
-Weapon select is disabled mid-air. Default ammo per match: Bazooka 3, Grenade 3, Shotgun 2, Ninja Rope unlimited.
+Weapon select is disabled mid-air. Ammo counts come from `CONFIG.ammo.*` — defaults: Bazooka 3, Grenade 3, Shotgun 2, Ninja Rope unlimited.
 
 ### Bazooka
 - Single projectile on a physics arc
