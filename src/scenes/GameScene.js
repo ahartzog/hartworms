@@ -5,6 +5,7 @@ import { Terrain } from '../entities/Terrain.js';
 import { TeamManager } from '../managers/TeamManager.js';
 import { TurnManager } from '../managers/TurnManager.js';
 import { Bazooka } from '../entities/weapons/Bazooka.js';
+import { Grenade } from '../entities/weapons/Grenade.js';
 
 const WEAPONS = ['Bazooka', 'Grenade', 'Shotgun', 'Ninja Rope'];
 
@@ -80,6 +81,30 @@ export class GameScene extends Phaser.Scene {
           this.ammo.bazooka--;
           this._currentWeapon = new Bazooka(
             this, this.terrain, this.teamManager.allWorms, tm.wind,
+            () => { tm.endTurn(); },
+            (hitWorm, dmg) => {
+              const ui = this.scene.get('UIScene');
+              if (ui) ui.showDamage(hitWorm.x, hitWorm.y - 20, dmg);
+            }
+          );
+          this._currentWeapon.fire(worm.x, worm.y, worm.getAimVector(), this.powerCharge);
+        }
+      }
+
+      // Grenade (weapon index 1)
+      if (this.weaponIndex === 1 && this.ammo.grenade > 0) {
+        if (this.spaceKey.isDown && !this.isCharging) {
+          this.isCharging = true;
+          this.powerCharge = 0;
+        }
+        if (this.isCharging && this.spaceKey.isDown) {
+          this.powerCharge = Math.min(1, this.powerCharge + delta / 1000);
+        }
+        if (this.isCharging && Phaser.Input.Keyboard.JustUp(this.spaceKey)) {
+          this.isCharging = false;
+          this.ammo.grenade--;
+          this._currentWeapon = new Grenade(
+            this, this.terrain, this.teamManager.allWorms,
             () => { tm.endTurn(); },
             (hitWorm, dmg) => {
               const ui = this.scene.get('UIScene');
