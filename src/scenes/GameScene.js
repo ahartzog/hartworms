@@ -14,8 +14,43 @@ const WEAPONS = ['Bazooka', 'Grenade', 'Shotgun', 'Ninja Rope'];
 export class GameScene extends Phaser.Scene {
   constructor() { super('GameScene'); }
 
+  preload() {
+    const BASE = 'assets/craftpix-net-622999-free-pixel-art-tiny-hero-sprites';
+    // Pink Monster
+    this.load.spritesheet('pink_idle',  `${BASE}/1 Pink_Monster/Pink_Monster_Idle_4.png`,  { frameWidth: 32, frameHeight: 32 });
+    this.load.spritesheet('pink_walk',  `${BASE}/1 Pink_Monster/Pink_Monster_Walk_6.png`,  { frameWidth: 32, frameHeight: 32 });
+    this.load.spritesheet('pink_jump',  `${BASE}/1 Pink_Monster/Pink_Monster_Jump_8.png`,  { frameWidth: 32, frameHeight: 32 });
+    this.load.spritesheet('pink_death', `${BASE}/1 Pink_Monster/Pink_Monster_Death_8.png`, { frameWidth: 32, frameHeight: 32 });
+    // Owlet Monster
+    this.load.spritesheet('owlet_idle',  `${BASE}/2 Owlet_Monster/Owlet_Monster_Idle_4.png`,  { frameWidth: 32, frameHeight: 32 });
+    this.load.spritesheet('owlet_walk',  `${BASE}/2 Owlet_Monster/Owlet_Monster_Walk_6.png`,  { frameWidth: 32, frameHeight: 32 });
+    this.load.spritesheet('owlet_jump',  `${BASE}/2 Owlet_Monster/Owlet_Monster_Jump_8.png`,  { frameWidth: 32, frameHeight: 32 });
+    this.load.spritesheet('owlet_death', `${BASE}/2 Owlet_Monster/Owlet_Monster_Death_8.png`, { frameWidth: 32, frameHeight: 32 });
+    // Dude Monster
+    this.load.spritesheet('dude_idle',  `${BASE}/3 Dude_Monster/Dude_Monster_Idle_4.png`,  { frameWidth: 32, frameHeight: 32 });
+    this.load.spritesheet('dude_walk',  `${BASE}/3 Dude_Monster/Dude_Monster_Walk_6.png`,  { frameWidth: 32, frameHeight: 32 });
+    this.load.spritesheet('dude_jump',  `${BASE}/3 Dude_Monster/Dude_Monster_Jump_8.png`,  { frameWidth: 32, frameHeight: 32 });
+    this.load.spritesheet('dude_death', `${BASE}/3 Dude_Monster/Dude_Monster_Death_8.png`, { frameWidth: 32, frameHeight: 32 });
+  }
+
+  _createAnims() {
+    const defs = [
+      { prefix: 'pink',  idle: 4, walk: 6, jump: 8, death: 8 },
+      { prefix: 'owlet', idle: 4, walk: 6, jump: 8, death: 8 },
+      { prefix: 'dude',  idle: 4, walk: 6, jump: 8, death: 8 },
+    ];
+    for (const { prefix, idle, walk, jump, death } of defs) {
+      this.anims.create({ key: `${prefix}_idle`,  frames: this.anims.generateFrameNumbers(`${prefix}_idle`,  { start: 0, end: idle  - 1 }), frameRate: 8,  repeat: -1 });
+      this.anims.create({ key: `${prefix}_walk`,  frames: this.anims.generateFrameNumbers(`${prefix}_walk`,  { start: 0, end: walk  - 1 }), frameRate: 10, repeat: -1 });
+      this.anims.create({ key: `${prefix}_jump`,  frames: this.anims.generateFrameNumbers(`${prefix}_jump`,  { start: 0, end: jump  - 1 }), frameRate: 10, repeat: 0  });
+      this.anims.create({ key: `${prefix}_death`, frames: this.anims.generateFrameNumbers(`${prefix}_death`, { start: 0, end: death - 1 }), frameRate: 10, repeat: 0  });
+    }
+  }
+
   create(data) {
     this.terrain = new Terrain(this, CONFIG.width, CONFIG.height, CONFIG.terrainSeed);
+
+    this._createAnims();
 
     const teamCount = data?.teamCount ?? 2;
     this.teamManager = new TeamManager(this, teamCount, this.terrain);

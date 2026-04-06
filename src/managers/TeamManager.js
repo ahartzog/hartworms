@@ -17,6 +17,8 @@ export class Team {
   }
 }
 
+const SPRITE_PREFIXES = ['pink', 'owlet', 'dude', 'pink'];
+
 export class TeamManager {
   constructor(scene, teamCount, terrain) {
     this.teams = [];
@@ -32,7 +34,8 @@ export class TeamManager {
           spawnX,
           50,
           CONFIG.teamColors[i],
-          `${CONFIG.teamNames[i]} ${w + 1}`
+          `${CONFIG.teamNames[i]} ${w + 1}`,
+          SPRITE_PREFIXES[i]
         );
         team.worms.push(worm);
       }

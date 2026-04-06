@@ -12,75 +12,107 @@ export const WormState = {
 };
 
 export class Worm {
-  constructor(scene, x, y, teamColor, name) {
+  constructor(scene, x, y, teamColor, name, spritePrefix = 'pink') {
     this.scene = scene;
     this.name = name;
     this.hp = CONFIG.wormHP;
     this.state = WormState.IDLE;
     this.isActive = false;
     this.facingRight = true;
-
     this.vx = 0;
     this.vy = 0;
-
     this.aimAngle = 45;
-
-    this.graphics = scene.add.graphics();
-    this.x = x;
-    this.y = y;
-    this._draw(teamColor);
-
     this.teamColor = teamColor;
     this._color = teamColor;
+    this._spritePrefix = spritePrefix;
+    this.x = x;
+    this.y = y;
+
+    // Sprite instead of graphics
+    this.sprite = scene.add.sprite(x, y, `${spritePrefix}_idle`).setScale(1.5).setOrigin(0.5, 0.5);
+    this.sprite.play(`${spritePrefix}_idle`);
+
+    // Active ring graphic (separate from sprite)
+    this.graphics = scene.add.graphics();
+
+    // HP bar background
+    this.hpBarBg = scene.add.graphics();
+    this.hpBarFill = scene.add.graphics();
+
+    // Name label
+    this.nameLabel = scene.add.text(x, y - 28, name, {
+      fontSize: '10px', color: '#ffffff',
+    }).setOrigin(0.5, 1);
   }
 
   get isDead() { return this.state === WormState.DEAD; }
 
   _draw(color) {
-    this.graphics.clear();
-    this.graphics.fillStyle(color, 1);
-    this.graphics.fillCircle(this.x, this.y, 12);
-    this.graphics.fillStyle(0xffffff, 1);
-    const eyeOffX = this.facingRight ? 4 : -4;
-    this.graphics.fillCircle(this.x + eyeOffX, this.y - 3, 3);
-    this.graphics.fillStyle(0x000000, 1);
-    this.graphics.fillCircle(this.x + eyeOffX + (this.facingRight ? 1 : -1), this.y - 3, 1.5);
-    if (this.isActive) {
-      this.graphics.lineStyle(2, 0xffffff, 1);
-      this.graphics.strokeCircle(this.x, this.y, 15);
+    // Update sprite position and facing
+    this.sprite.setPosition(this.x, this.y);
+    this.sprite.setFlipX(!this.facingRight);
+
+    // Play animation based on state
+    const prefix = this._spritePrefix;
+    const state = this.state;
+    if (state === WormState.FALLING) {
+      if (!this.sprite.anims.currentAnim?.key.startsWith(prefix + '_jump')) {
+        this.sprite.play(`${prefix}_jump`, true);
+      }
+    } else if (state === WormState.MOVING) {
+      if (!this.sprite.anims.currentAnim?.key.startsWith(prefix + '_walk')) {
+        this.sprite.play(`${prefix}_walk`, true);
+      }
+    } else {
+      if (!this.sprite.anims.currentAnim?.key.startsWith(prefix + '_idle')) {
+        this.sprite.play(`${prefix}_idle`, true);
+      }
     }
 
-    // Aim line with arrowhead
-    if (this.isActive && !this.isDead) {
-      const aim = this.getAimVector();
-      const LINE_START = 16;  // just outside body
-      const LINE_END = 60;    // length of aim indicator
-      const DOT_SPACING = 8;
+    // Active ring
+    this.graphics.clear();
+    if (this.isActive) {
+      this.graphics.lineStyle(2, 0xffffff, 1);
+      this.graphics.strokeCircle(this.x, this.y, 18);
 
-      // Dotted line
+      // Aim indicator
+      const aim = this.getAimVector();
+      const LINE_START = 20;
+      const LINE_END = 65;
+      const DOT_SPACING = 8;
       this.graphics.fillStyle(0xffff00, 0.9);
       for (let d = LINE_START; d < LINE_END - 10; d += DOT_SPACING) {
-        const dotX = this.x + aim.x * d;
-        const dotY = this.y + aim.y * d;
-        this.graphics.fillCircle(dotX, dotY, 2);
+        this.graphics.fillCircle(this.x + aim.x * d, this.y + aim.y * d, 2);
       }
-
-      // Arrowhead at the end
       const tipX = this.x + aim.x * LINE_END;
       const tipY = this.y + aim.y * LINE_END;
-      // Perpendicular vector
       const perpX = -aim.y;
       const perpY = aim.x;
-      const ARROW_SIZE = 6;
+      const A = 6;
       this.graphics.fillStyle(0xffff00, 1);
       this.graphics.fillTriangle(
         tipX, tipY,
-        tipX - aim.x * ARROW_SIZE + perpX * ARROW_SIZE * 0.5,
-        tipY - aim.y * ARROW_SIZE + perpY * ARROW_SIZE * 0.5,
-        tipX - aim.x * ARROW_SIZE - perpX * ARROW_SIZE * 0.5,
-        tipY - aim.y * ARROW_SIZE - perpY * ARROW_SIZE * 0.5
+        tipX - aim.x * A + perpX * A * 0.5, tipY - aim.y * A + perpY * A * 0.5,
+        tipX - aim.x * A - perpX * A * 0.5, tipY - aim.y * A - perpY * A * 0.5
       );
     }
+
+    // HP bar (above sprite)
+    this.hpBarBg.clear();
+    this.hpBarFill.clear();
+    const barW = 24;
+    const barH = 3;
+    const barX = this.x - barW / 2;
+    const barY = this.y - 26;
+    this.hpBarBg.fillStyle(0x333333, 1);
+    this.hpBarBg.fillRect(barX, barY, barW, barH);
+    const pct = this.hp / CONFIG.wormHP;
+    const fillColor = pct > 0.5 ? 0x44ff44 : pct > 0.25 ? 0xffaa00 : 0xff3333;
+    this.hpBarFill.fillStyle(fillColor, 1);
+    this.hpBarFill.fillRect(barX, barY, barW * pct, barH);
+
+    // Name label
+    this.nameLabel.setPosition(this.x, this.y - 29);
   }
 
   update(terrain, delta) {
@@ -155,11 +187,14 @@ export class Worm {
 
   die() {
     this.state = WormState.DEAD;
-    this.graphics.destroy();
-    const g = this.scene.add.graphics();
-    g.fillStyle(0x888888, 1);
-    g.fillRect(this.x - 4, this.y - 16, 8, 16);
-    g.fillRect(this.x - 8, this.y - 20, 16, 6);
+    this.sprite.play(`${this._spritePrefix}_death`);
+    this.sprite.once('animationcomplete', () => {
+      this.sprite.setVisible(false);
+    });
+    this.graphics.clear();
+    this.hpBarBg.clear();
+    this.hpBarFill.clear();
+    this.nameLabel.setVisible(false);
   }
 
   setActive(active) {
