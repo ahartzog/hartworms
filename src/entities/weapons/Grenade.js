@@ -44,6 +44,7 @@ export class Grenade {
           const hitV = this.terrain.isSolid(px, nextY);
           if (hitH) vx *= -CONFIG.grenade.bounce;
           if (hitV) vy *= -CONFIG.grenade.bounce;
+          if (!hitH && !hitV) { vx *= -CONFIG.grenade.bounce; vy *= -CONFIG.grenade.bounce; }
         } else {
           px = nextX;
           py = nextY;

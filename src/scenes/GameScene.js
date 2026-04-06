@@ -46,6 +46,7 @@ export class GameScene extends Phaser.Scene {
     this.weaponIndex = 0;
     this._currentWeapon = null;
     this.isCharging = false;
+    this.powerCharge = 0;
   }
 
   update(time, delta) {
@@ -63,9 +64,13 @@ export class GameScene extends Phaser.Scene {
       // Weapon switch
       if (Phaser.Input.Keyboard.JustDown(this.keyQ)) {
         this.weaponIndex = (this.weaponIndex + WEAPONS.length - 1) % WEAPONS.length;
+        this.isCharging = false;
+        this.powerCharge = 0;
       }
       if (Phaser.Input.Keyboard.JustDown(this.keyE)) {
         this.weaponIndex = (this.weaponIndex + 1) % WEAPONS.length;
+        this.isCharging = false;
+        this.powerCharge = 0;
       }
 
       // Fire bazooka (weapon index 0)

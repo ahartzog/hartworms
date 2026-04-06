@@ -27,8 +27,10 @@ export class Shotgun {
       this._castRay(x, y, dx, dy, damage, knockback);
     }
 
-    this.active = false;
-    this.scene.time.delayedCall(300, () => this.onFired());
+    this.scene.time.delayedCall(300, () => {
+      this.active = false;
+      this.onFired();
+    });
   }
 
   _castRay(ox, oy, dx, dy, damage, knockback) {
