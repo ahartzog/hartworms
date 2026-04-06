@@ -50,6 +50,7 @@ export class GameScene extends Phaser.Scene {
       const winner = tm.winningTeam;
       this.scene.start('MenuScene');
       console.log(`Winner: ${winner?.name ?? 'Nobody'}`);
+      return;
     }
 
     this.debugText.setText([
