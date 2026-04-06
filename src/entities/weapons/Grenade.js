@@ -34,7 +34,7 @@ export class Grenade {
       loop: true,
       callback: () => {
         const dt = 0.016;
-        vy += 400 * dt;
+        vy += CONFIG.gravity.grenade * dt;
 
         const nextX = px + vx * dt;
         const nextY = py + vy * dt;

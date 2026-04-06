@@ -55,7 +55,7 @@ export class Worm {
     if (this.isDead) return;
 
     const dt = delta / 1000;
-    const GRAVITY = 500;
+    const GRAVITY = CONFIG.gravity.worm;
     const WORM_RADIUS = 12;
 
     this.vy += GRAVITY * dt;

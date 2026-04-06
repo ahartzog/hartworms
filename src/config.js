@@ -58,4 +58,11 @@ export const CONFIG = {
 
   // Terrain
   terrainSeed: null,     // null = random; set a number to replay same map
+
+  // Physics
+  gravity: {
+    worm: 500,
+    bazooka: 300,
+    grenade: 400,
+  },
 };

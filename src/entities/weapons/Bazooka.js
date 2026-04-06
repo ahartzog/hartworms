@@ -33,7 +33,7 @@ export class Bazooka {
       callback: () => {
         const dt = 0.016;
         vx += WIND_FORCE * dt;
-        vy += 300 * dt;
+        vy += CONFIG.gravity.bazooka * dt;
         px += vx * dt;
         py += vy * dt;
 

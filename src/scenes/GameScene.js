@@ -45,7 +45,6 @@ export class GameScene extends Phaser.Scene {
   }
 
   _onTurnEnd({ team, worm, wind }) {
-    this.ammo = { ...CONFIG.ammo };
     this.weaponIndex = 0;
     this._currentWeapon = null;
     this.isCharging = false;
@@ -64,6 +63,10 @@ export class GameScene extends Phaser.Scene {
       else worm.stopWalk();
 
       if (Phaser.Input.Keyboard.JustDown(this.cursors.up)) worm.jump();
+
+      // Aim rotation
+      if (this.keyA.isDown) worm.rotateAim(-1);
+      if (this.keyD.isDown) worm.rotateAim(1);
 
       // Weapon switch
       if (Phaser.Input.Keyboard.JustDown(this.keyQ)) {

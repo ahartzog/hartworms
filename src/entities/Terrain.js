@@ -15,6 +15,7 @@ export class Terrain {
     const resolvedSeed = seed ?? Math.floor(Math.random() * 1e9);
     this._draw(resolvedSeed);
 
+    if (scene.textures.exists('terrain')) scene.textures.remove('terrain');
     scene.textures.addCanvas('terrain', this.canvas);
     this.image = scene.add.image(0, 0, 'terrain').setOrigin(0, 0);
   }
