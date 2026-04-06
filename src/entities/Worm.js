@@ -64,7 +64,7 @@ export class Worm {
     this.y += this.vy * dt;
 
     const feetY = this.y + WORM_RADIUS;
-    if (terrain.isSolid(this.x, feetY)) {
+    if (terrain.isSolid(this.x, feetY) && this.vy >= 0) {
       let surfY = feetY;
       while (surfY > this.y && terrain.isSolid(this.x, surfY)) surfY--;
       this.y = surfY - WORM_RADIUS;
@@ -123,7 +123,7 @@ export class Worm {
 
   die() {
     this.state = WormState.DEAD;
-    this.graphics.clear();
+    this.graphics.destroy();
     const g = this.scene.add.graphics();
     g.fillStyle(0x888888, 1);
     g.fillRect(this.x - 4, this.y - 16, 8, 16);
