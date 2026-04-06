@@ -26,6 +26,12 @@ export class UIScene extends Phaser.Scene {
       fontSize: '18px', color: '#ffffff',
     }).setOrigin(1, 1);
 
+    // Power bar (shown while charging)
+    this.powerBarBg = this.add.rectangle(width / 2, this.scale.height - 20, 200, 16, 0x333333).setOrigin(0.5, 0.5);
+    this.powerBarFill = this.add.rectangle(width / 2 - 100, this.scale.height - 20, 0, 14, 0xff4400).setOrigin(0, 0.5);
+    this.powerBarBg.setVisible(false);
+    this.powerBarFill.setVisible(false);
+
     // Floating damage number pool
     this._floaters = [];
   }
@@ -49,6 +55,13 @@ export class UIScene extends Phaser.Scene {
 
     const ammoStr = ammo === Infinity ? '∞' : `${ammo}`;
     this.weaponLabel.setText(`${weaponName}  ×${ammoStr}`);
+
+    const showPower = state.power != null;
+    this.powerBarBg.setVisible(showPower);
+    this.powerBarFill.setVisible(showPower);
+    if (showPower) {
+      this.powerBarFill.width = (state.power ?? 0) * 200;
+    }
   }
 
   /**

@@ -189,20 +189,34 @@ export class GameScene extends Phaser.Scene {
         wind: tm.wind,
         weaponName: WEAPONS[this.weaponIndex],
         ammo: ammoVal,
+        power: this.isCharging ? this.powerCharge : null,
       });
     }
 
     // Game over
     if (tm.isGameOver) {
       const winner = tm.winningTeam;
-      this.add.text(CONFIG.width / 2, CONFIG.height / 2,
-        `${winner?.name ?? 'Nobody'} Wins! 🎉`,
-        { fontSize: '56px', color: '#ffdd00', fontStyle: 'bold' }
-      ).setOrigin(0.5);
+      const cx = CONFIG.width / 2;
+      const cy = CONFIG.height / 2;
+
+      this.add.rectangle(cx, cy, CONFIG.width, CONFIG.height, 0x000000, 0.6);
+      this.add.rectangle(cx, cy, 500, 200, 0x1a1a2e).setOrigin(0.5);
+      this.add.rectangle(cx, cy, 496, 196, 0x2a2a4e).setOrigin(0.5);
+
+      const winColor = winner ? '#' + winner.color.toString(16).padStart(6, '0') : '#ffffff';
+      this.add.text(cx, cy - 40, winner ? `${winner.name} Wins! 🎉` : 'Draw!', {
+        fontSize: '48px', color: winColor, fontStyle: 'bold',
+      }).setOrigin(0.5);
+
+      this.add.text(cx, cy + 20, 'Returning to menu...', {
+        fontSize: '20px', color: '#aaaaaa',
+      }).setOrigin(0.5);
+
       this.time.delayedCall(3000, () => {
         this.scene.stop('UIScene');
         this.scene.start('MenuScene');
       });
+
       this.turnManager.turnActive = false;
     }
   }
