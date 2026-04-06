@@ -62,6 +62,8 @@ export class Terrain {
     }
     ctx.closePath();
     ctx.fill();
+
+    this.pixels = this.ctx.getImageData(0, 0, this.width, this.height).data;
   }
 
   blast(x, y, radius) {
@@ -74,12 +76,13 @@ export class Terrain {
     ctx.globalCompositeOperation = prev;
 
     this.scene.textures.get('terrain').refresh();
+    this.pixels = this.ctx.getImageData(0, 0, this.width, this.height).data;
   }
 
   isSolid(x, y) {
     if (x < 0 || x >= this.width || y < 0 || y >= this.height) return false;
-    const pixel = this.ctx.getImageData(Math.floor(x), Math.floor(y), 1, 1).data;
-    return pixel[3] > 10;
+    const idx = (Math.floor(y) * this.width + Math.floor(x)) * 4;
+    return this.pixels[idx + 3] > 10;
   }
 
   getSurfaceY(x, startY) {
