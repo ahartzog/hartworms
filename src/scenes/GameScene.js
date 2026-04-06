@@ -62,8 +62,8 @@ export class GameScene extends Phaser.Scene {
     this.ammo = { ...CONFIG.ammo };
 
     this.cursors = this.input.keyboard.createCursorKeys();
-    this.keyA = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.A);
-    this.keyD = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.D);
+    this.keyW = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.W);
+    this.keyS = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.S);
     this.keyQ = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.Q);
     this.keyE = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.E);
 
@@ -85,6 +85,8 @@ export class GameScene extends Phaser.Scene {
     this.isCharging = false;
     this.powerCharge = 0;
     if (this._rope) { this._rope.destroy(); this._rope = null; }
+    // Stop all worm movement at turn end
+    for (const w of this.teamManager.allWorms) w.stopWalk();
   }
 
   update(time, delta) {
@@ -100,8 +102,8 @@ export class GameScene extends Phaser.Scene {
       if (Phaser.Input.Keyboard.JustDown(this.cursors.up)) worm.jump();
 
       // Aim rotation
-      if (this.keyA.isDown) worm.rotateAim(-1);
-      if (this.keyD.isDown) worm.rotateAim(1);
+      if (this.keyW.isDown) worm.rotateAim(-1);
+      if (this.keyS.isDown) worm.rotateAim(1);
 
       // Weapon switch
       if (Phaser.Input.Keyboard.JustDown(this.keyQ)) {

@@ -142,6 +142,15 @@ export class Worm {
       }
     }
 
+    // Hard map boundaries — bounce off sides, die only if below map
+    if (this.x < WORM_RADIUS) {
+      this.x = WORM_RADIUS;
+      this.vx = Math.abs(this.vx) * 0.5;
+    } else if (this.x > terrain.width - WORM_RADIUS) {
+      this.x = terrain.width - WORM_RADIUS;
+      this.vx = -Math.abs(this.vx) * 0.5;
+    }
+
     if (this.y > terrain.height + 50) {
       this.die();
     }
