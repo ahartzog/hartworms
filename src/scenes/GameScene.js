@@ -6,6 +6,7 @@ import { TeamManager } from '../managers/TeamManager.js';
 import { TurnManager } from '../managers/TurnManager.js';
 import { Bazooka } from '../entities/weapons/Bazooka.js';
 import { Grenade } from '../entities/weapons/Grenade.js';
+import { Shotgun } from '../entities/weapons/Shotgun.js';
 
 const WEAPONS = ['Bazooka', 'Grenade', 'Shotgun', 'Ninja Rope'];
 
@@ -112,6 +113,22 @@ export class GameScene extends Phaser.Scene {
             }
           );
           this._currentWeapon.fire(worm.x, worm.y, worm.getAimVector(), this.powerCharge);
+        }
+      }
+
+      // Shotgun (weapon index 2)
+      if (this.weaponIndex === 2 && this.ammo.shotgun > 0 && worm.state !== 'falling') {
+        if (Phaser.Input.Keyboard.JustDown(this.spaceKey)) {
+          this.ammo.shotgun--;
+          this._currentWeapon = new Shotgun(
+            this, this.terrain, this.teamManager.allWorms,
+            () => { tm.endTurn(); },
+            (hitWorm, dmg) => {
+              const ui = this.scene.get('UIScene');
+              if (ui) ui.showDamage(hitWorm.x, hitWorm.y - 20, dmg);
+            }
+          );
+          this._currentWeapon.fire(worm.x, worm.y, worm.getAimVector());
         }
       }
     }
