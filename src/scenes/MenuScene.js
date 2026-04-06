@@ -70,17 +70,25 @@ export class MenuScene extends Phaser.Scene {
     }).setOrigin(0.5).setInteractive({ useHandCursor: true });
 
     startBtn.on('pointerdown', () => {
-      this.scene.start('GameScene', { teamCount });
       this.scene.launch('UIScene');
+      this.scene.start('GameScene', { teamCount });
     });
 
-    startBtn.on('pointerover', () => startBtn.setStyle({ backgroundColor: '#ffcc00' }));
-    startBtn.on('pointerout', () => startBtn.setStyle({ backgroundColor: '#ffdd00' }));
+    const btnBaseStyle = {
+      fontSize: '40px', color: '#000000',
+      backgroundColor: '#ffdd00',
+      padding: { x: 30, y: 14 },
+      fontStyle: 'bold',
+    };
+    startBtn.on('pointerover', () => startBtn.setStyle({ ...btnBaseStyle, backgroundColor: '#ffcc00' }));
+    startBtn.on('pointerout',  () => startBtn.setStyle(btnBaseStyle));
 
     // SPACE shortcut
-    this.input.keyboard.once('keydown-SPACE', () => {
-      this.scene.start('GameScene', { teamCount });
+    const onSpace = () => {
       this.scene.launch('UIScene');
-    });
+      this.scene.start('GameScene', { teamCount });
+    };
+    this.input.keyboard.on('keydown-SPACE', onSpace);
+    this.events.once('shutdown', () => this.input.keyboard.off('keydown-SPACE', onSpace));
   }
 }
