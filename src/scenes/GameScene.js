@@ -37,6 +37,7 @@ export class GameScene extends Phaser.Scene {
     this.isCharging = false;
     this._currentWeapon = null;
     this._rope = null;
+    this._gameOverShown = false;
   }
 
   _ammoKey() {
@@ -194,7 +195,8 @@ export class GameScene extends Phaser.Scene {
     }
 
     // Game over
-    if (tm.isGameOver) {
+    if (tm.isGameOver && !this._gameOverShown) {
+      this._gameOverShown = true;
       const winner = tm.winningTeam;
       const cx = CONFIG.width / 2;
       const cy = CONFIG.height / 2;
