@@ -4,6 +4,7 @@ import { CONFIG } from '../config.js';
 import { Terrain } from '../entities/Terrain.js';
 import { TeamManager } from '../managers/TeamManager.js';
 import { TurnManager } from '../managers/TurnManager.js';
+import { Bazooka } from '../entities/weapons/Bazooka.js';
 
 const WEAPONS = ['Bazooka', 'Grenade', 'Shotgun', 'Ninja Rope'];
 
@@ -27,6 +28,11 @@ export class GameScene extends Phaser.Scene {
     this.keyD = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.D);
     this.keyQ = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.Q);
     this.keyE = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.E);
+
+    this.spaceKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
+    this.powerCharge = 0;
+    this.isCharging = false;
+    this._currentWeapon = null;
   }
 
   _ammoKey() {
@@ -36,13 +42,15 @@ export class GameScene extends Phaser.Scene {
   _onTurnEnd({ team, worm, wind }) {
     this.ammo = { ...CONFIG.ammo };
     this.weaponIndex = 0;
+    this._currentWeapon = null;
+    this.isCharging = false;
   }
 
   update(time, delta) {
     const tm = this.turnManager;
     const worm = tm.activeWorm;
 
-    if (tm.turnActive && worm && !worm.isDead) {
+    if (tm.turnActive && worm && !worm.isDead && !this._currentWeapon?.active) {
       // Movement
       if (this.cursors.left.isDown) worm.walk(-1);
       else if (this.cursors.right.isDown) worm.walk(1);
@@ -56,6 +64,30 @@ export class GameScene extends Phaser.Scene {
       }
       if (Phaser.Input.Keyboard.JustDown(this.keyE)) {
         this.weaponIndex = (this.weaponIndex + 1) % WEAPONS.length;
+      }
+
+      // Fire bazooka (weapon index 0)
+      if (this.weaponIndex === 0 && this.ammo.bazooka > 0) {
+        if (this.spaceKey.isDown && !this.isCharging) {
+          this.isCharging = true;
+          this.powerCharge = 0;
+        }
+        if (this.isCharging && this.spaceKey.isDown) {
+          this.powerCharge = Math.min(1, this.powerCharge + delta / 1000);
+        }
+        if (this.isCharging && Phaser.Input.Keyboard.JustUp(this.spaceKey)) {
+          this.isCharging = false;
+          this.ammo.bazooka--;
+          this._currentWeapon = new Bazooka(
+            this, this.terrain, this.teamManager.allWorms, tm.wind,
+            () => { tm.endTurn(); },
+            (hitWorm, dmg) => {
+              const ui = this.scene.get('UIScene');
+              if (ui) ui.showDamage(hitWorm.x, hitWorm.y - 20, dmg);
+            }
+          );
+          this._currentWeapon.fire(worm.x, worm.y, worm.getAimVector(), this.powerCharge);
+        }
       }
     }
 
