@@ -49,6 +49,38 @@ export class Worm {
       this.graphics.lineStyle(2, 0xffffff, 1);
       this.graphics.strokeCircle(this.x, this.y, 15);
     }
+
+    // Aim line with arrowhead
+    if (this.isActive && !this.isDead) {
+      const aim = this.getAimVector();
+      const LINE_START = 16;  // just outside body
+      const LINE_END = 60;    // length of aim indicator
+      const DOT_SPACING = 8;
+
+      // Dotted line
+      this.graphics.fillStyle(0xffff00, 0.9);
+      for (let d = LINE_START; d < LINE_END - 10; d += DOT_SPACING) {
+        const dotX = this.x + aim.x * d;
+        const dotY = this.y + aim.y * d;
+        this.graphics.fillCircle(dotX, dotY, 2);
+      }
+
+      // Arrowhead at the end
+      const tipX = this.x + aim.x * LINE_END;
+      const tipY = this.y + aim.y * LINE_END;
+      // Perpendicular vector
+      const perpX = -aim.y;
+      const perpY = aim.x;
+      const ARROW_SIZE = 6;
+      this.graphics.fillStyle(0xffff00, 1);
+      this.graphics.fillTriangle(
+        tipX, tipY,
+        tipX - aim.x * ARROW_SIZE + perpX * ARROW_SIZE * 0.5,
+        tipY - aim.y * ARROW_SIZE + perpY * ARROW_SIZE * 0.5,
+        tipX - aim.x * ARROW_SIZE - perpX * ARROW_SIZE * 0.5,
+        tipY - aim.y * ARROW_SIZE - perpY * ARROW_SIZE * 0.5
+      );
+    }
   }
 
   update(terrain, delta) {
