@@ -32,6 +32,21 @@ export class UIScene extends Phaser.Scene {
     this.powerBarBg.setVisible(false);
     this.powerBarFill.setVisible(false);
 
+    // Bottom-left: controls legend
+    const legendLines = [
+      '← → Move   ↑ Jump',
+      'W / S  Aim   Q / E  Weapon',
+      'SPACE  Charge + Fire',
+    ];
+    const legendY = this.scale.height - 12;
+    legendLines.reverse().forEach((line, i) => {
+      this.add.text(12, legendY - i * 18, line, {
+        fontSize: '13px',
+        color: '#cccccc',
+        alpha: 0.75,
+      }).setAlpha(0.75);
+    });
+
     // Floating damage number pool
     this._floaters = [];
   }

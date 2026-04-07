@@ -212,6 +212,7 @@ export class Worm {
   }
 
   knockback(ox, oy, force) {
+    if (this.isDead) return;
     const dx = this.x - ox;
     const dy = this.y - oy;
     const d = Math.sqrt(dx * dx + dy * dy) || 1;

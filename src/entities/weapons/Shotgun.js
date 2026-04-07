@@ -12,7 +12,7 @@ export class Shotgun {
     this.active = false;
   }
 
-  fire(x, y, aimVector) {
+  fire(x, y, aimVector, shooter) {
     if (this.active) return;
     this.active = true;
 
@@ -24,7 +24,7 @@ export class Shotgun {
       const angle = baseAngle + spreadOffset;
       const dx = Math.cos(angle);
       const dy = Math.sin(angle);
-      this._castRay(x, y, dx, dy, damage, knockback);
+      this._castRay(x, y, dx, dy, damage, knockback, shooter);
     }
 
     this.scene.time.delayedCall(300, () => {
@@ -33,7 +33,7 @@ export class Shotgun {
     });
   }
 
-  _castRay(ox, oy, dx, dy, damage, knockback) {
+  _castRay(ox, oy, dx, dy, damage, knockback, shooter) {
     const MAX_DIST = 600;
     const STEP = 4;
 
@@ -52,7 +52,7 @@ export class Shotgun {
       }
 
       for (const worm of this.allWorms) {
-        if (worm.isDead) continue;
+        if (worm === shooter || worm.isDead) continue;
         const wx = worm.x - cx;
         const wy = worm.y - cy;
         if (Math.sqrt(wx * wx + wy * wy) < 14) {

@@ -14,15 +14,16 @@ export class Bazooka {
     this.active = false;
   }
 
-  fire(x, y, aimVector, power) {
+  fire(x, y, aimVector, power, shooter) {
     if (this.active) return;
     this.active = true;
 
     const speed = CONFIG.bazooka.speed * power;
     let vx = aimVector.x * speed;
     let vy = aimVector.y * speed;
-    let px = x;
-    let py = y;
+    // Offset spawn position so the projectile clears the firing worm's collision radius
+    let px = x + aimVector.x * 20;
+    let py = y + aimVector.y * 20;
 
     const g = this.scene.add.graphics();
     const WIND_FORCE = this.wind * 15;
@@ -49,7 +50,7 @@ export class Bazooka {
         }
 
         for (const worm of this.allWorms) {
-          if (worm.isDead) continue;
+          if (worm === shooter || worm.isDead) continue;
           const dx = worm.x - px;
           const dy = worm.y - py;
           if (Math.sqrt(dx * dx + dy * dy) < 14) {
