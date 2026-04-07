@@ -124,7 +124,19 @@ export class Worm {
 
     this.vy += GRAVITY * dt;
 
+    const prevX = this.x;
     this.x += this.vx * dt;
+
+    // Block walking up slopes steeper than 45°
+    if (this.vx !== 0 && this.state === WormState.MOVING) {
+      const slope = terrain.getSlopeAngleDeg(this.x, this.y + WORM_RADIUS);
+      if (slope > 45) {
+        this.x = prevX;
+        this.vx = 0;
+        this.state = WormState.IDLE;
+      }
+    }
+
     this.y += this.vy * dt;
 
     const feetY = this.y + WORM_RADIUS;

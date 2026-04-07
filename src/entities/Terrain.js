@@ -92,4 +92,14 @@ export class Terrain {
     }
     return null;
   }
+
+  // Returns slope angle in degrees at pixel column x, searching from nearY upward.
+  // Samples SAMPLE pixels left and right; rise/run > tan(45°) = 1 means too steep.
+  getSlopeAngleDeg(x, nearY) {
+    const SAMPLE = 6;
+    const searchFrom = Math.max(0, nearY - 30);
+    const yL = this.getSurfaceY(Math.max(0, x - SAMPLE), searchFrom) ?? nearY;
+    const yR = this.getSurfaceY(Math.min(this.width - 1, x + SAMPLE), searchFrom) ?? nearY;
+    return Math.abs(Math.atan2(Math.abs(yR - yL), SAMPLE * 2) * 180 / Math.PI);
+  }
 }

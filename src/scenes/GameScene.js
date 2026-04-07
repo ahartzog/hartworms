@@ -92,12 +92,15 @@ export class GameScene extends Phaser.Scene {
     this.keyQ = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.Q);
     this.keyE = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.E);
 
+    this.escKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ESC);
     this.spaceKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
     this.powerCharge = 0;
     this.isCharging = false;
     this._currentWeapon = null;
     this._rope = null;
     this._gameOverShown = false;
+    this._paused = false;
+    this._pauseOverlay = null;
     // Play "go" for the first turn (subsequent turns handled by _onTurnEnd)
     this.time.delayedCall(300, () => this.sounds?.vo_go?.play());
 
@@ -136,7 +139,28 @@ export class GameScene extends Phaser.Scene {
     this.sounds.vo_go.play();
   }
 
+  _togglePause() {
+    this._paused = !this._paused;
+    if (this._paused) {
+      this.turnManager.turnActive = false;
+      const cx = CONFIG.width / 2;
+      const cy = CONFIG.height / 2;
+      this._pauseOverlay = this.add.container(0, 0, [
+        this.add.rectangle(cx, cy, CONFIG.width, CONFIG.height, 0x000000, 0.5),
+        this.add.text(cx, cy - 20, 'PAUSED', { fontSize: '64px', color: '#ffffff', fontStyle: 'bold' }).setOrigin(0.5),
+        this.add.text(cx, cy + 36, 'Press ESC to resume', { fontSize: '20px', color: '#aaaaaa' }).setOrigin(0.5),
+      ]);
+    } else {
+      this._pauseOverlay?.destroy();
+      this._pauseOverlay = null;
+      this.turnManager.turnActive = !this.turnManager.isGameOver;
+    }
+  }
+
   update(time, delta) {
+    if (Phaser.Input.Keyboard.JustDown(this.escKey)) this._togglePause();
+    if (this._paused) return;
+
     const tm = this.turnManager;
     const worm = tm.activeWorm;
 
